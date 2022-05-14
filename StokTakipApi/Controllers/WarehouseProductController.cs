@@ -41,10 +41,10 @@ namespace StokTakipApi.Controllers
                             warehouseProducts.Add(new WarehouseProduct()
                             {
                                 Id = (int)reader.GetValue("id"),
-                                ProductId = (int)reader.GetValue("warehouseCode"),
-                                WarehouseId = (int)reader.GetValue("warehouseName"),
-                                Quantity = (int)reader.GetValue("warehouseAddress"),
-                                Date = (DateTime)reader.GetValue("warehouseCapacity")
+                                ProductId = (int)reader.GetValue("productId"),
+                                WarehouseId = (int)reader.GetValue("warehouseId"),
+                                Quantity = (int)reader.GetValue("quantity"),
+                                Date = (DateTime)reader.GetValue("date")
                             });
                         }
                     }
@@ -75,10 +75,10 @@ namespace StokTakipApi.Controllers
                             warehouseProducts.Add(new WarehouseProduct()
                             {
                                 Id = (int)reader.GetValue("id"),
-                                ProductId = (int)reader.GetValue("warehouseCode"),
-                                WarehouseId = (int)reader.GetValue("warehouseName"),
-                                Quantity = (int)reader.GetValue("warehouseAddress"),
-                                Date = (DateTime)reader.GetValue("warehouseCapacity")
+                                ProductId = (int)reader.GetValue("productId"),
+                                WarehouseId = (int)reader.GetValue("warehouseId"),
+                                Quantity = (int)reader.GetValue("quantity"),
+                                Date = (DateTime)reader.GetValue("date")
                             });
                         }
                     }
@@ -96,7 +96,7 @@ namespace StokTakipApi.Controllers
                 "(" + warehouseProduct.ProductId + "," +
                 "" + warehouseProduct.WarehouseId + "," +
                 "" + warehouseProduct.Quantity + ",'" +
-                warehouseProduct.Date + "')";
+                warehouseProduct.Date.Month.ToString() + "-" + warehouseProduct.Date.Day.ToString() + "-" + warehouseProduct.Date.Year.ToString() + "')";
             using (con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -114,11 +114,11 @@ namespace StokTakipApi.Controllers
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] WarehouseProduct warehouseProduct)
         {
-            string sqlQuery = "Update warehouses set " +
-                "productId = '" + warehouseProduct.ProductId + "'," +
-                "warehouseId = '" + warehouseProduct.WarehouseId + "'," +
-                "quantity = '" + warehouseProduct.Quantity + "'," +
-                "date = '" + warehouseProduct.Date + "'," +
+            string sqlQuery = "Update warehouseProduct set " +
+                "productId = " + warehouseProduct.ProductId + "," +
+                "warehouseId = " + warehouseProduct.WarehouseId + "," +
+                "quantity = " + warehouseProduct.Quantity + "," +
+                "date = '" + warehouseProduct.Date.Month.ToString() + "-" + warehouseProduct.Date.Day.ToString() + "-" + warehouseProduct.Date.Year.ToString() + "' " +
                 "where id = " + id;
             using (con = new SqlConnection(connectionString))
             {
@@ -137,8 +137,8 @@ namespace StokTakipApi.Controllers
         [HttpPut("updateQuantity/{id}")]
         public void updateQuantity(int id, [FromBody] int quantity)
         {
-            string sqlQuery = "Update warehouses set " +
-                "quantity = '" + quantity + "'," +
+            string sqlQuery = "Update warehouseProduct set " +
+                "quantity = " + quantity + " " +
                 "where id = " + id;
             using (con = new SqlConnection(connectionString))
             {
