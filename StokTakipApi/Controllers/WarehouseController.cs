@@ -85,6 +85,44 @@ namespace StokTakipApi.Controllers
                 return warehouseCapacities;
             }
         }
+        [HttpGet("warehouseProductsDetail/{id}")]
+        public IEnumerable<ProductDetailWarehouse> warehouseProductsDetail(int id)
+        {
+            List<ProductDetailWarehouse> productDetailWarehouses = new();
+            using (con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                cmd = new SqlCommand("select wp.id as wpId, wp.quantity , wp.date , pd.id , pd.productName , pd.productCode , " +
+                    "pd.productDesc , pd.productPrice   from warehouseProduct as wp join products as pd on pd.id =  " +
+                    "wp.productId where wp.isDeleted = 'false' and pd.isDeleted = 'false' and wp.warehouseId =  " + id)
+                {
+                    Connection = con
+                };
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            productDetailWarehouses.Add(new ProductDetailWarehouse()
+                            {
+                                OrderNumber = (int)reader.GetValue("wpId"),
+                                Quantity = (int)reader.GetValue("quantity"),
+                                Date = (DateTime)reader.GetValue("date"),
+                                ProductId = (int)reader.GetValue("id"),
+                                ProductName = reader.GetValue("productName").ToString(),
+                                ProductCode = reader.GetValue("productCode").ToString(),
+                                ProductDescription = reader.GetValue("productDesc").ToString(),
+                                ProductUnitPrice = (int)reader.GetValue("productPrice")
+                            });
+                        }
+                    }
+                }
+                con.Close();
+                return productDetailWarehouses;
+            }
+        }
         [HttpGet("warehouseProductsQuantity")]
         public IEnumerable<WarehouseProductQuantity> warehouseProductQuantity()
         {

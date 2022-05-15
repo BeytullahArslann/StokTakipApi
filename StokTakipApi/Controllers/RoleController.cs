@@ -56,7 +56,7 @@ namespace StokTakipApi.Controllers
             using (con = new SqlConnection(connectionString))
             {
                 con.Open();
-                cmd = new SqlCommand("Select * from roles where where isDeleted = 'false' and id = " + id)
+                cmd = new SqlCommand("Select * from roles where isDeleted = 'false' and id = " + id)
                 {
                     Connection = con
                 };

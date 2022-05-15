@@ -80,7 +80,8 @@ namespace StokTakipApi.Controllers
                                 Email = reader.GetValue("userEmail").ToString(),
                                 roleId = (int)reader.GetValue("userRole"),
                                 birthDate = (DateTime)reader.GetValue("userBirthDay"),
-                                isActive = (Boolean)reader.GetValue("isActive")
+                                isActive = (Boolean)reader.GetValue("isActive"),
+                                password = reader.GetValue("userPassword").ToString(),
                             });
                         }
                     }
@@ -118,7 +119,8 @@ namespace StokTakipApi.Controllers
                                 Email = reader.GetValue("userEmail").ToString(),
                                 roleId = (int)reader.GetValue("userRole"),
                                 birthDate = (DateTime)reader.GetValue("userBirthDay"),
-                                isActive = (Boolean)reader.GetValue("isActive")
+                                isActive = (Boolean)reader.GetValue("isActive"),
+                                password = reader.GetValue("userPassword").ToString(),
                             });
                         }
                     }
@@ -129,7 +131,7 @@ namespace StokTakipApi.Controllers
         }
 
         // POST api/<UserController>
-        [HttpPost("addUser/{user}")]
+        [HttpPost("addUser")]
         public void addUser([FromBody] User user)
         {
             using (con = new SqlConnection(connectionString))
@@ -147,7 +149,7 @@ namespace StokTakipApi.Controllers
         }
 
         // PUT api/<UserController>/5
-        [HttpPut("updateUser/{id}/{user}")]
+        [HttpPut("updateUser/{id}")]
         public void updateUser(int id, [FromBody] User user)
         {
             using (con = new SqlConnection(connectionString))
@@ -195,7 +197,7 @@ namespace StokTakipApi.Controllers
         {
             using (con = new SqlConnection(connectionString))
             {
-                String sqlQuery = "update users " +
+                String sqlQuery = "update users set " +
                     "isDeleted = 'true' " +
                     "where id = " + id;
                 con.Open();

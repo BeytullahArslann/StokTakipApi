@@ -57,7 +57,7 @@ namespace StokTakipApi.Controllers
             using (con = new SqlConnection(connectionString))
             {
                 con.Open();
-                cmd = new SqlCommand("Select * from products where isDeleted = 'false' and where = " + id)
+                cmd = new SqlCommand("Select * from products where isDeleted = 'false' and id = " + id)
                 {
                     Connection = con
                 };
@@ -85,7 +85,7 @@ namespace StokTakipApi.Controllers
         }
 
         // POST api/<ProductController>
-        [HttpPost("addProduct/{product}")]
+        [HttpPost("addProduct")]
         public void addProduct([FromBody] Product product)
         {
             string sqlQuery = "Insert Into products (productCode,productName,productDesc,productPrice) values " +
@@ -107,14 +107,14 @@ namespace StokTakipApi.Controllers
         }
 
         // PUT api/<ProductController>/5
-        [HttpPut("updateProduct/{id},{product}")]
+        [HttpPut("updateProduct/{id}")]
         public void updateProduct(int id, [FromBody] Product product)
         {
             string sqlQuery = "Update products set " +
                 "productName = '" + product.Name + "'," +
                 "productCode = '" + product.Code + "'," +
                 "productDesc = '" + product.Description + "'," +
-                "productPrice = '" + product.Price + "'," +
+                "productPrice = '" + product.Price + "' " +
                 "where id = " + id;
             using (con = new SqlConnection(connectionString))
             {
@@ -133,7 +133,7 @@ namespace StokTakipApi.Controllers
         public void Delete(int id)
         {
             string sqlQuery = "Update products set " +
-                "isDeleted = 'true" +
+                "isDeleted = 'true' " +
                 "where id = " + id;
             using (con = new SqlConnection(connectionString))
             {
