@@ -91,13 +91,13 @@ namespace StokTakipApi.Controllers
         }
 
         // Login
-        [HttpGet("login/{userName}/{password}")]
-        public bool Login(String userName , String password)
+        [HttpGet("login")]
+        public IEnumerable<User> Login(String Email , String password)
         {
             using (con = new SqlConnection(connectionString))
             {
                 con.Open();
-                cmd = new SqlCommand("Select COUNT(*) as count from users where isActive = 'true' and isDeleted = 'false' and userName = '" + userName + "' and userPassword = '" + password + "'")
+                cmd = new SqlCommand("Select *  from users where isActive = 'true' and isDeleted = 'false' and userEmail = '" + Email + "' and userPassword = '" + password + "'")
                 {
                     Connection = con
                 };
@@ -110,13 +110,21 @@ namespace StokTakipApi.Controllers
                     {
                         while (reader.Read())
                         {
-
-                            count = (int)reader.GetValue("count");
+                            users.Add(new User()
+                            {
+                                userId = (int)reader.GetValue("id"),
+                                userName = reader.GetValue("userName").ToString(),
+                                userSurname = reader.GetValue("userSurname").ToString(),
+                                Email = reader.GetValue("userEmail").ToString(),
+                                roleId = (int)reader.GetValue("userRole"),
+                                birthDate = (DateTime)reader.GetValue("userBirthDay"),
+                                isActive = (Boolean)reader.GetValue("isActive")
+                            });
                         }
                     }
                 }
                 con.Close();
-                return count > 0;
+                return users;
             }
         }
 

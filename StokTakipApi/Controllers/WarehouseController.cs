@@ -44,13 +44,76 @@ namespace StokTakipApi.Controllers
                                 Name = reader.GetValue("warehouseName").ToString(),
                                 Address = reader.GetValue("warehouseAddress").ToString(),
                                 Capacity = (int)reader.GetValue("warehouseCapacity"),
-                                AdminId = (int)reader.GetValue("warehouseAdminId")
+                                AdminId = (int)reader.GetValue("warehouseAdminId"),
+                                IsActive = (bool)reader.GetValue("isActive")
                             });
                         }
                     }
                 }
                 con.Close();
                 return warehouses;
+            }
+        }
+        
+        [HttpGet("warehouseCapacity")]
+        public IEnumerable<WarehouseCapacity> warehouseCapacity()
+        {
+            List<WarehouseCapacity> warehouseCapacities = new();
+            using (con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                cmd = new SqlCommand("select  sum(wp.quantity) as stock, warehouseId  from warehouses join warehouseProduct as wp on warehouses.id = wp.warehouseId group by wp.warehouseId")
+                {
+                    Connection = con
+                };
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            warehouseCapacities.Add(new WarehouseCapacity()
+                            {
+                                WarehouseId = (int)reader.GetValue("warehouseId"),
+                                Quantity = (int)reader.GetValue("stock"),
+                            });
+                        }
+                    }
+                }
+                con.Close();
+                return warehouseCapacities;
+            }
+        }
+        [HttpGet("warehouseProductsQuantity")]
+        public IEnumerable<WarehouseProductQuantity> warehouseProductQuantity()
+        {
+            List<WarehouseProductQuantity> warehouseProductQuantities = new();
+            using (con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                cmd = new SqlCommand("select   sum(quantity) as stock , productId, warehouseId   from warehouses join warehouseProduct as wp on warehouses.id = wp.warehouseId group by warehouseId, productId")
+                {
+                    Connection = con
+                };
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            warehouseProductQuantities.Add(new WarehouseProductQuantity()
+                            {
+                                WarehouseId = (int)reader.GetValue("warehouseId"),
+                                Quantity = (int)reader.GetValue("stock"),
+                                ProductId = (int)reader.GetValue("productId")
+                            });
+                        }
+                    }
+                }
+                con.Close();
+                return warehouseProductQuantities;
             }
         }
 
@@ -79,8 +142,9 @@ namespace StokTakipApi.Controllers
                                 Name = reader.GetValue("warehouseName").ToString(),
                                 Address = reader.GetValue("warehouseAddress").ToString(),
                                 Capacity = (int)reader.GetValue("warehouseCapacity"),
-                                AdminId = (int)reader.GetValue("warehouseAdminId")
-                            });
+                                AdminId = (int)reader.GetValue("warehouseAdminId"),
+                                IsActive = (bool)reader.GetValue("isActive")
+                            }) ;
                         }
                     }
                 }
@@ -90,7 +154,7 @@ namespace StokTakipApi.Controllers
         }
 
         // POST api/<WarehouseController>
-        [HttpPost("addWarehouse/{warehouse}")]
+        [HttpPost("addWarehouse")]
         public void addWarehouse([FromBody] Warehouse warehouse)
         {
             string sqlQuery = "Insert Into warehouses (warehouseCode,warehouseName,warehouseAddress,warehouseCapacity,warehouseAdminId) values " +
@@ -112,7 +176,7 @@ namespace StokTakipApi.Controllers
         }
 
         // PUT api/<WarehouseController>/5
-        [HttpPut("updateWarehouse/{id},{warehouse}")]
+        [HttpPut("updateWarehouse/{id}")]
         public void Put(int id, [FromBody] Warehouse warehouse)
         {
             string sqlQuery = "Update warehouses set " +
