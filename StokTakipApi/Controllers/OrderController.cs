@@ -15,6 +15,7 @@ namespace StokTakipApi.Controllers
         SqlConnection con;
         SqlCommand cmd;
         List<Order> orders = new();
+        List<OrderTable> orderTables = new();
 
         string connectionString = "Server=MSI; Database=STOKTAKIPOTOMASYONU; Trusted_Connection=True; TrustServerCertificate=True;";
 
@@ -121,9 +122,82 @@ namespace StokTakipApi.Controllers
                 return orders;
             }
         }
+        // GET api/<OrderController>/5
+        [HttpGet("getOrderTable")]
+        public IEnumerable<OrderTable> GetOrderTable()
+        {
+            string sqlQuery = "select wp.id as orderId , (users.userName + ' ' + users.userSurname) as userName , " +
+                    "(wp.quantity * (select productPrice from products where id = wp.productId)) as price , " +
+                    "wp.type , wp.createdAt as date from orderProducts as wp " +
+                    "join products on wp.productId = products.id join users on wp.userId = users.id where wp.isDeleted = 'false'";
+            using (con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                cmd = new SqlCommand(sqlQuery)
+                {
+                    Connection = con
+                };
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            orderTables.Add(new OrderTable()
+                            {
+                                OrderId = (int)reader.GetValue("orderId"),
+                                UserName = reader.GetValue("userName").ToString(),
+                                Price = (int)reader.GetValue("price"),
+                                Date = (DateTime)reader.GetValue("date"),
+                                Type = (bool)reader.GetValue("type")
+                            });
+                        }
+                    }
+                }
+                con.Close();
+                return orderTables;
+            }
+        }
+        // GET api/<OrderController>/5
+        [HttpGet("getOrderTableByUserId/{id}")]
+        public IEnumerable<OrderTable> GetOrderTableByUserId(int id)
+        {
+            using (con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                cmd = new SqlCommand("select wp.id as orderId , (users.userName + ' ' + users.userSurname) as userName , " +
+                    "(wp.quantity * (select productPrice from products where id = wp.productId)) as price , " +
+                    "wp.type , wp.createdAt as date from orderProducts as wp " +
+                    "join products on wp.productId = products.id join users on wp.userId = users.id where wp.isDeleted = 'false' and wp.userId =" + id)
+                {
+                    Connection = con
+                };
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            orderTables.Add(new OrderTable()
+                            {
+                                OrderId = (int)reader.GetValue("orderId"),
+                                UserName = reader.GetValue("userName").ToString(),
+                                Price = (int)reader.GetValue("price"),
+                                Date = (DateTime)reader.GetValue("date"),
+                                Type = (bool)reader.GetValue("type")
+                            });
+                        }
+                    }
+                }
+                con.Close();
+                return orderTables;
+            }
+        }
 
         // POST api/<OrderController>
-        [HttpPost("addOrder/{order}")]
+        [HttpPost("addOrder")]
         public void addOrder([FromBody] Order order)
         {
             string sqlQuery = "Insert Into orders (userId,orderPrice,orderDate,isCompleted) values " +
@@ -185,7 +259,7 @@ namespace StokTakipApi.Controllers
         }
 
         // Complete Order api/<OrderController>/5
-        [HttpDelete("completeOrder/{id}")]
+        [HttpPut("completeOrder/{id}")]
         public void CompleteOrder(int id)
         {
             string sqlQuery = "Update orders set " +

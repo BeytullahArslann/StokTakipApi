@@ -92,11 +92,10 @@ namespace StokTakipApi.Controllers
         [HttpPost]
         public void Post([FromBody] WarehouseProduct  warehouseProduct)
         {
-            string sqlQuery = "Insert Into warehouseProduct (productId,warehouseId,quantity,date) values " +
+            string sqlQuery = "Insert Into warehouseProduct (productId,warehouseId,quantity) values " +
                 "(" + warehouseProduct.ProductId + "," +
                 "" + warehouseProduct.WarehouseId + "," +
-                "" + warehouseProduct.Quantity + ",'" +
-                warehouseProduct.Date.Month.ToString() + "-" + warehouseProduct.Date.Day.ToString() + "-" + warehouseProduct.Date.Year.ToString() + "')";
+                "" + warehouseProduct.Quantity + ")";
             using (con = new SqlConnection(connectionString))
             {
                 con.Open();

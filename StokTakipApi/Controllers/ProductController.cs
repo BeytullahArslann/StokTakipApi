@@ -83,6 +83,40 @@ namespace StokTakipApi.Controllers
                 return products;
             }
         }
+        // GET api/<ProductController>/5
+        [HttpGet("getProductsByWarehouse/{id}")]
+        public IEnumerable<Product> GetProductsByWarehouse(int id)
+        {
+            using (con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                cmd = new SqlCommand("select products.id ,products.productCode, products.productName , products.productDesc, " +
+                    "products.productPrice  from products join warehouseProduct as wp on wp.productId = products.id where wp.warehouseId =" + id)
+                {
+                    Connection = con
+                };
+
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            products.Add(new Product()
+                            {
+                                Id = (int)reader.GetValue("id"),
+                                Name = reader.GetValue("productName").ToString(),
+                                Description = reader.GetValue("productDesc").ToString(),
+                                Code = reader.GetValue("productCode").ToString(),
+                                Price = (int)reader.GetValue("productPrice"),
+                            });
+                        }
+                    }
+                }
+                con.Close();
+                return products;
+            }
+        }
 
         // POST api/<ProductController>
         [HttpPost("addProduct")]

@@ -13,6 +13,7 @@ namespace StokTakipApi.Controllers
     {
         SqlConnection con;
         SqlCommand cmd;
+        SqlCommand cmd2;
         List<Product> products = new();
         string connectionString = "Server=MSI; Database=STOKTAKIPOTOMASYONU; Trusted_Connection=True; TrustServerCertificate=True;";
 
@@ -50,14 +51,28 @@ namespace StokTakipApi.Controllers
         }
 
         // POST api/<OrderProductController>
-        [HttpPost("addProduct/{orderProduct}")]
-        public void Post([FromBody] OrderProduct orderProduct , int warehouseId , int quantity)
+        [HttpPost("addProduct")]
+        public void Post([FromBody] OrderProduct orderProduct)
         {
-            string sqlQuery = "Insert Into orderProducts (productId,orderId,type,quantity) values " +
+            string sqlQueryUpdate = "";
+            if (!orderProduct.Type)
+            {
+                sqlQueryUpdate = "update warehouseProduct set quantity = ((select quantity from warehouseProduct " +
+                    "where warehouseId =" + orderProduct.WarehouseId + " and productId = " + orderProduct.ProductId + " and isDeleted = 'false') + " + orderProduct.Quantity + ")  " +
+                    "where warehouseId = " + orderProduct.WarehouseId + " and productId = " + orderProduct.ProductId + " and isDeleted = 'false'";
+            }
+            else
+            {
+                sqlQueryUpdate = "update warehouseProduct set quantity = ((select quantity from warehouseProduct " +
+                    "where warehouseId =" + orderProduct.WarehouseId + " and productId = " + orderProduct.ProductId + " and isDeleted = 'false') - " + orderProduct.Quantity + ")  " +
+                    "where warehouseId = " + orderProduct.WarehouseId + " and productId = " + orderProduct.ProductId + " and isDeleted = 'false'";
+            }
+            string sqlQuery = "Insert Into orderProducts (productId,userId,type,quantity,warehouseId) values " +
                 "(" + orderProduct.ProductId + "," +
-                "" + orderProduct.OrderId + "," +
+                "" + orderProduct.UserId + "," +
                 "'" + orderProduct.Type + "'," +
-                "" + quantity + ")";
+                "" + orderProduct.Quantity + "," + orderProduct.WarehouseId + 
+                ")";
             using (con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -66,6 +81,13 @@ namespace StokTakipApi.Controllers
                     Connection = con
                 };
                 cmd.ExecuteReader();
+                con.Close();
+                con.Open();
+                cmd2 = new SqlCommand(sqlQueryUpdate)
+                {
+                    Connection = con
+                };
+                cmd2.ExecuteReader();
                 con.Close();
             }
         }
